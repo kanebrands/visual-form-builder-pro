@@ -4,6 +4,10 @@ This repository contains a modernization pass for the legacy Visual Form Builder
 
 The current work focuses on compatibility fixes: reducing PHP warnings, notices, deprecations, and fatal errors caused by older PHP idioms while avoiding broad rewrites of the plugin architecture.
 
+## Original Plugin Credit
+
+Visual Form Builder Pro was originally authored by Matthew Muro. The original plugin site is available at [https://vfbpro.com](https://vfbpro.com).
+
 ## Requirements
 
 - PHP 8.3 or newer.

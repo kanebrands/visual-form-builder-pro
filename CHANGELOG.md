@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.5.4 - Oct 01, 2026
+
+### Metadata Updates
+
+- Updated the WordPress plugin header `Plugin URI` to point to the Kane Brands GitHub repository.
+- Updated the displayed plugin author to Kane Brands with the Kane Brands GitHub profile as the author URL.
+- Updated the plugin update-details author response to link to Kane Brands.
+- Added README credit for original author Matthew Muro and the original Visual Form Builder Pro site.
+- Updated the WordPress readme stable tag and release notes for version 2.5.4.
+
 ## PHP 8.3 Modernization Commit
 
 This commit updates the legacy Visual Form Builder Pro PHP code so it can run more cleanly on PHP 8.3 and newer while preserving the original plugin behavior.

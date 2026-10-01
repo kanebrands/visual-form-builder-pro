@@ -1,16 +1,16 @@
 <?php
 /*
 Plugin Name: Visual Form Builder Pro
-Plugin URI: http://vfbpro.com
+Plugin URI: https://github.com/kanebrands/visual-form-builder-pro
 Description: Dynamically build forms using a simple interface. Forms include jQuery validation, a basic logic-based verification system, and entry tracking.
-Author: Matthew Muro
-Author URI: http://matthewmuro.com
-Version: 2.5.3
+Author: Kane Brands
+Author URI: https://github.com/kanebrands
+Version: 2.5.4
 Update URI: https://github.com/kanebrands/visual-form-builder-pro
 */
 
 // Version number to output as meta tag
-define( 'VFB_PRO_VERSION', '2.5.3' );
+define( 'VFB_PRO_VERSION', '2.5.4' );
 define( 'VFB_PRO_GITHUB_REPO', 'kanebrands/visual-form-builder-pro' );
 define( 'VFB_PRO_GITHUB_REPO_URL', 'https://github.com/kanebrands/visual-form-builder-pro' );
 
@@ -474,7 +474,7 @@ class Visual_Form_Builder_Pro{
 			return $false;
 
 		$response->name          = 'Visual Form Builder Pro';
-		$response->author        = 'Matthew Muro';
+		$response->author        = '<a href="https://github.com/kanebrands">Kane Brands</a>';
 		$response->homepage      = VFB_PRO_GITHUB_REPO_URL;
 		$response->download_link = $response->package;
 		$response->sections      = array(

@@ -3,11 +3,17 @@ Contributors: mmuro, mkane
 Requires at least: 6.4
 Tested up to: 7.1.2
 Requires PHP: 8.3
-Stable tag: 2.5.2
+Stable tag: 2.5.4
 
 Visual Form Builder Pro is an affordable WordPress plugin that helps you build beautiful, fully functional forms in only a few minutes without writing PHP, CSS, or HTML.
 
 == Release Notes ==
+
+**Version 2.5.4 - Oct 01, 2026**
+
+* Update plugin site metadata to point to the Kane Brands GitHub repository
+* Update plugin author metadata to Kane Brands with the Kane Brands GitHub profile as the author URL
+* Add README credit for original author Matthew Muro and the original Visual Form Builder Pro site
 
 **Version 2.5.2 - Oct 01, 2026**
 
