@@ -5,11 +5,11 @@ Plugin URI: http://vfbpro.com
 Description: Dynamically build forms using a simple interface. Forms include jQuery validation, a basic logic-based verification system, and entry tracking.
 Author: Matthew Muro
 Author URI: http://matthewmuro.com
-Version: 2.5.1
+Version: 2.5.2
 */
 
 // Version number to output as meta tag
-define( 'VFB_PRO_VERSION', '2.5.1' );
+define( 'VFB_PRO_VERSION', '2.5.2' );
 
 if ( ! function_exists( 'vfb_pro_safe_unserialize' ) ) {
 	function vfb_pro_safe_unserialize( $value, $default = array() ) {

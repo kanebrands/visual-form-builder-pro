@@ -1,12 +1,24 @@
 === Visual Form Builder Pro ===
-Contributors: mmuro
-Requires at least: 3.5
-Tested up to: 4.3
-Stable tag: 2.5.1
+Contributors: mmuro, mkane
+Requires at least: 6.4
+Tested up to: 7.1.2
+Requires PHP: 8.3
+Stable tag: 2.5.2
 
 Visual Form Builder Pro is an affordable WordPress plugin that helps you build beautiful, fully functional forms in only a few minutes without writing PHP, CSS, or HTML.
 
 == Release Notes ==
+
+**Version 2.5.2 - Oct 01, 2026**
+
+* Update PHP compatibility for PHP 8.3 and newer
+* Add compatibility attributes for legacy dynamic properties and built-in interface return types
+* Replace deprecated PHP functions used by export and UTF-8 conversion paths
+* Improve safe handling of legacy serialized form, email, entry, PayPal, and rule data
+* Harden session cookie parsing and session ID access
+* Add guards for optional request and server values to reduce notices in modern PHP environments
+* Fix PHP 8.3 deprecations caused by optional parameters declared before required parameters
+* Confirm all PHP files pass PHP 8.3.35 syntax checks
 
 **Version 2.5.1 - Sep 09, 2015**
 
