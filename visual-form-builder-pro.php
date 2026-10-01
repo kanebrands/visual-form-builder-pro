@@ -5,11 +5,14 @@ Plugin URI: http://vfbpro.com
 Description: Dynamically build forms using a simple interface. Forms include jQuery validation, a basic logic-based verification system, and entry tracking.
 Author: Matthew Muro
 Author URI: http://matthewmuro.com
-Version: 2.5.2
+Version: 2.5.3
+Update URI: https://github.com/kanebrands/visual-form-builder-pro
 */
 
 // Version number to output as meta tag
-define( 'VFB_PRO_VERSION', '2.5.2' );
+define( 'VFB_PRO_VERSION', '2.5.3' );
+define( 'VFB_PRO_GITHUB_REPO', 'kanebrands/visual-form-builder-pro' );
+define( 'VFB_PRO_GITHUB_REPO_URL', 'https://github.com/kanebrands/visual-form-builder-pro' );
 
 if ( ! function_exists( 'vfb_pro_safe_unserialize' ) ) {
 	function vfb_pro_safe_unserialize( $value, $default = array() ) {
@@ -95,7 +98,7 @@ class Visual_Form_Builder_Pro{
 	 * @var string
 	 * @access protected
 	 */
-	protected $api_url = 'http://classic.vfbpro.com/plugin-api/';
+	protected $api_url = 'https://api.github.com/repos/kanebrands/visual-form-builder-pro/releases/latest';
 
 	/**
 	 * Flag used to add scripts to front-end only once
@@ -351,25 +354,18 @@ class Visual_Form_Builder_Pro{
 	 */
 	public function api_check( $transient ) {
 
-		// If no checked transiest, just return its value without hacking it
+		// If no checked transient, just return its value without changing it.
 		if ( empty( $transient->checked ) )
 			return $transient;
 
-		// Append checked transient information
 		$plugin_slug = plugin_basename( __FILE__ );
 
-		// POST data to send to your API
-		$args = array(
-			'action' 		=> 'update-check',
-			'plugin_name' 	=> $plugin_slug,
-			'version' 		=> $transient->checked[ $plugin_slug ],
-		);
+		if ( ! isset( $transient->checked[ $plugin_slug ] ) )
+			return $transient;
 
-		// Send request checking for an update
-		$response = $this->api_request( $args );
+		$response = $this->api_request();
 
-		// If response is false, don't alter the transient
-		if ( false !== $response )
+		if ( false !== $response && version_compare( $response->new_version, $transient->checked[ $plugin_slug ], '>' ) )
 			$transient->response[ $plugin_slug ] = $response;
 
 		return $transient;
@@ -380,23 +376,78 @@ class Visual_Form_Builder_Pro{
 	 *
 	 * @since 1.0
 	 */
-	public function api_request( $args ) {
+	public function api_request( $args = array() ) {
 
-		// Send request
-		$request = wp_remote_post( $this->api_url, array( 'body' => $args ) );
+		$release = get_site_transient( 'vfb_pro_github_release' );
 
-		// If request fails, stop
-		if ( is_wp_error( $request ) ||	wp_remote_retrieve_response_code( $request ) != 200	)
+		if ( false === $release ) {
+			$request = wp_remote_get(
+				$this->api_url,
+				array(
+					'headers' => array(
+						'Accept'     => 'application/vnd.github+json',
+						'User-Agent' => 'WordPress/' . get_bloginfo( 'version' ) . '; ' . home_url( '/' ),
+					),
+					'timeout' => 15,
+				)
+			);
+
+			if ( is_wp_error( $request ) || wp_remote_retrieve_response_code( $request ) != 200 )
+				return false;
+
+			$release = json_decode( wp_remote_retrieve_body( $request ) );
+
+			if ( ! is_object( $release ) )
+				return false;
+
+			set_site_transient( 'vfb_pro_github_release', $release, 10 * MINUTE_IN_SECONDS );
+		}
+
+		if ( ! empty( $release->draft ) || ! empty( $release->prerelease ) )
 			return false;
 
-		// Retrieve and set response
-		$response = maybe_unserialize( wp_remote_retrieve_body( $request ) );
+		$version = isset( $release->tag_name ) ? ltrim( $release->tag_name, 'v' ) : '';
 
-		// Read server response, which should be an object
-		if ( is_object( $response ) )
-			return $response;
-		else
+		if ( empty( $version ) )
 			return false;
+
+		$package = $this->github_release_package_url( $release );
+
+		if ( empty( $package ) )
+			return false;
+
+		$response = new stdClass();
+		$response->id          = VFB_PRO_GITHUB_REPO_URL;
+		$response->slug        = dirname( plugin_basename( __FILE__ ) );
+		$response->plugin      = plugin_basename( __FILE__ );
+		$response->new_version = $version;
+		$response->url         = VFB_PRO_GITHUB_REPO_URL;
+		$response->package     = $package;
+		$response->tested      = isset( $release->tested ) ? $release->tested : '';
+
+		return $response;
+	}
+
+	/**
+	 * Find the best ZIP package URL attached to a GitHub release.
+	 *
+	 * @since 2.5.3
+	 */
+	public function github_release_package_url( $release ) {
+		if ( empty( $release->assets ) || ! is_array( $release->assets ) )
+			return isset( $release->zipball_url ) ? $release->zipball_url : '';
+
+		foreach ( $release->assets as $asset ) {
+			if ( isset( $asset->name, $asset->browser_download_url ) && 'visual-form-builder-pro.zip' === $asset->name )
+				return $asset->browser_download_url;
+		}
+
+		foreach ( $release->assets as $asset ) {
+			if ( isset( $asset->name, $asset->browser_download_url ) && preg_match( '/\.zip$/i', $asset->name ) )
+				return $asset->browser_download_url;
+		}
+
+		return isset( $release->zipball_url ) ? $release->zipball_url : '';
 	}
 
 	/**
@@ -407,26 +458,29 @@ class Visual_Form_Builder_Pro{
 	public function api_information( $false, $action, $args ) {
 
 		$plugin_slug = plugin_basename( __FILE__ );
+		$slug        = dirname( $plugin_slug );
 
 		// Check if requesting info
 		if ( !isset( $args->slug ) )
 			return $false;
 
 		// Check if this plugins API is about this plugin
-		if ( isset( $args->slug ) && $args->slug != $plugin_slug )
+		if ( isset( $args->slug ) && $args->slug != $plugin_slug && $args->slug != $slug )
 			return $false;
 
-		// POST data to send to your API
-		$args = array(
-			'action' 		=> 'plugin_information',
-			'plugin_name' 	=> $plugin_slug,
+		$response = $this->api_request();
+
+		if ( false === $response )
+			return $false;
+
+		$response->name          = 'Visual Form Builder Pro';
+		$response->author        = 'Matthew Muro';
+		$response->homepage      = VFB_PRO_GITHUB_REPO_URL;
+		$response->download_link = $response->package;
+		$response->sections      = array(
+			'description' => 'Dynamically build forms using a simple interface.',
+			'changelog'   => empty( $response->new_version ) ? '' : 'See the GitHub release notes for version ' . esc_html( $response->new_version ) . '.',
 		);
-
-		// Send request for detailed information
-		$response = $this->api_request( $args );
-
-		// Send request checking for information
-		$request = wp_remote_post( $this->api_url, array( 'body' => $args ) );
 
 		return $response;
 	}
